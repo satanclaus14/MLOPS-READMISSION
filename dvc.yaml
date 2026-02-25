@@ -1,0 +1,56 @@
+stages:
+  download_data:
+    cmd: python src/data/download_data.py
+    outs:
+      - data/raw/readmission.csv
+
+  clean_data:
+    cmd: python src/data/clean_data.py
+    deps:
+      - data/raw/readmission.csv
+    outs:
+      - data/processed/clean.csv
+
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+      - data/processed/clean.csv
+    outs:
+      - data/features/features.parquet
+
+  split_data:
+    cmd: python src/data/split_data.py
+    deps:
+      - data/features/features.parquet
+    outs:
+      - data/features/train.parquet
+      - data/features/test.parquet
+
+  train_models:
+    cmd: python src/training/train_lr.py && python src/training/train_rf.py && python src/training/train_xgb.py
+    deps:
+      - data/features/train.parquet
+    outs:
+      - models/artifacts/
+
+  evaluate:
+    cmd: python src/training/evaluate.py
+    deps:
+      - data/features/test.parquet
+      - models/artifacts/
+    outs:
+      - reports/metrics.json
+
+  select_best_model:
+    cmd: python src/training/select_best_model.py
+    deps:
+      - reports/metrics.json
+    outs:
+      - reports/best_model.json
+
+  register_model:
+    cmd: python src/registry/register_model.py
+    deps:
+      - reports/best_model.json
+      - models/artifacts/
+

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# Environments
+.venv/
+env/
+venv/
+
+# ML artifacts
+mlruns/
+models/
+reports/
+logs/
+
+# DVC
+.dvc/cache/
+
+# OS
+.DS_Store
+
+# Secrets
+.env
+
