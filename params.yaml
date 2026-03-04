@@ -4,11 +4,11 @@ split:
 
 training:
   metric: auc
-  min_auc_threshold: 0.75
+  min_auc_threshold: 0.65
 
 log_reg:
   C: 1.0
-  max_iter: 500
+  max_iter: 2000
 
 random_forest:
   n_estimators: 300

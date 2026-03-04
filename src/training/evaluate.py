@@ -31,9 +31,16 @@ def main():
         ("log_reg", MODELS_DIR / "log_reg.pkl"),
         ("random_forest", MODELS_DIR / "random_forest.pkl"),
         ("xgboost", MODELS_DIR / "xgboost.pkl"),
-    ]:
+        ]:
         model = joblib.load(file)
-        metrics[name] = eval_model(model, X, y)
+
+    # 🔥 Align test features to training features
+        if hasattr(model, "feature_names_in_"):
+            X_aligned = X.reindex(columns=model.feature_names_in_, fill_value=0)
+        else:
+            X_aligned = X
+
+        metrics[name] = eval_model(model, X_aligned, y)
 
     with open(METRICS_FILE, "w") as f:
         json.dump(metrics, f, indent=2)

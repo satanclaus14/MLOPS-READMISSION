@@ -1,3 +1,4 @@
+from pyexpat import model
 import yaml
 import joblib
 import pandas as pd
@@ -34,6 +35,15 @@ def main():
 
     with mlflow.start_run(run_name="xgboost"):
         mlflow.log_params(params["xgboost"])
+
+        X.columns = (X.columns
+                        .str.replace("[", "", regex=False)
+                        .str.replace("]", "", regex=False)
+                        .str.replace("<", "", regex=False)
+                        .str.replace(">", "", regex=False)
+                        .str.replace("(", "", regex=False)
+                        .str.replace(")", "", regex=False)
+                    )
 
         model.fit(X, y)
 

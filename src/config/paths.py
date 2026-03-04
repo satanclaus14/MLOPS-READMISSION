@@ -10,7 +10,7 @@ FEATURES_DIR = DATA_DIR / "features"
 MODELS_DIR = PROJECT_ROOT / "models" / "artifacts"
 REPORTS_DIR = PROJECT_ROOT / "reports"
 
-RAW_FILE = RAW_DIR / "readmission.csv"
+RAW_FILE = RAW_DIR / "diabetic_data.csv"
 CLEAN_FILE = PROCESSED_DIR / "clean.csv"
 
 FEATURE_FILE = FEATURES_DIR / "features.parquet"

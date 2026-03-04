@@ -1,0 +1,119 @@
+schema: '2.0'
+stages:
+  clean_data:
+    cmd: PYTHONPATH=. python src/data/clean_data.py
+    deps:
+    - path: data/raw/diabetic_data.csv
+      hash: md5
+      md5: 502f0cc004e4cf71536ec2e61596e42f
+      size: 19159383
+    outs:
+    - path: data/processed/clean.csv
+      hash: md5
+      md5: 9695ac4504e82e7e98cff507ce675128
+      size: 229890948
+  build_features:
+    cmd: PYTHONPATH=. python src/features/build_features.py
+    deps:
+    - path: data/processed/clean.csv
+      hash: md5
+      md5: 9695ac4504e82e7e98cff507ce675128
+      size: 229890948
+    outs:
+    - path: data/features/features.parquet
+      hash: md5
+      md5: a68e9735d22fe16a812f751bca991fa2
+      size: 52117312
+  split_data:
+    cmd: PYTHONPATH=. python src/data/split_data.py
+    deps:
+    - path: data/features/features.parquet
+      hash: md5
+      md5: a68e9735d22fe16a812f751bca991fa2
+      size: 52117312
+    outs:
+    - path: data/features/test.parquet
+      hash: md5
+      md5: 950d2383c3a9c1c46c0dc843031b3fac
+      size: 10290315
+    - path: data/features/train.parquet
+      hash: md5
+      md5: f6381b3a717a78d345f3eaa7135b70ab
+      size: 41597575
+  train_lr:
+    cmd: PYTHONPATH=. python src/training/train_lr.py
+    deps:
+    - path: data/features/train.parquet
+      hash: md5
+      md5: f6381b3a717a78d345f3eaa7135b70ab
+      size: 41597575
+    outs:
+    - path: models/artifacts/log_reg.pkl
+      hash: md5
+      md5: 0648464e9ad709792c194d3dcfc1a5d1
+      size: 1871
+  train_rf:
+    cmd: PYTHONPATH=. python src/training/train_rf.py
+    deps:
+    - path: data/features/train.parquet
+      hash: md5
+      md5: f6381b3a717a78d345f3eaa7135b70ab
+      size: 41597575
+    outs:
+    - path: models/artifacts/random_forest.pkl
+      hash: md5
+      md5: 8269f113c5395357a2d11b359f1b2b48
+      size: 59342521
+  train_xgb:
+    cmd: PYTHONPATH=. python src/training/train_xgb.py
+    deps:
+    - path: data/features/train.parquet
+      hash: md5
+      md5: f6381b3a717a78d345f3eaa7135b70ab
+      size: 41597575
+    outs:
+    - path: models/artifacts/xgboost.pkl
+      hash: md5
+      md5: ff827441c5cbfef88952a128efd6a7df
+      size: 2112773
+  evaluate:
+    cmd: PYTHONPATH=. python src/training/evaluate.py
+    deps:
+    - path: data/features/test.parquet
+      hash: md5
+      md5: 950d2383c3a9c1c46c0dc843031b3fac
+      size: 10290315
+    - path: models/artifacts/
+      hash: md5
+      md5: 13fef5d87777665a3281bcb68b3c2278.dir
+      size: 61457165
+      nfiles: 3
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: e2d30a8449ce9e8ce6acab4cb087d0c4
+      size: 458
+  select_best_model:
+    cmd: PYTHONPATH=. python src/training/select_best_model.py
+    deps:
+    - path: reports/metrics.json
+      hash: md5
+      md5: e2d30a8449ce9e8ce6acab4cb087d0c4
+      size: 458
+    outs:
+    - path: reports/best_model.json
+      hash: md5
+      md5: c74a9716cf81106fc3168b9cfe63801c
+      size: 134
+  register_model:
+    cmd: PYTHONPATH=. python src/registry/register_model.py
+    deps:
+    - path: models/artifacts/
+      hash: md5
+      md5: 52af8c5ed5aea7a50f901745f73f1f1c.dir
+      size: 52425603
+      nfiles: 3
+    - path: reports/best_model.json
+      hash: md5
+      md5: 145ed43ed610fa844adcd42f0851740d
+      size: 139
